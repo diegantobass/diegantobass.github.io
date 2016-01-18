@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.js" charset="utf-8"></script>  
+  </head>
+  <body>
+  	<script>
+  		var ladata = [
+		    {"institut": "Sofres", "count": 4616},
+		    {"institut": "Ifop", "count": 3683},
+		    {"institut": "BVA", "count": 1600},
+		    {"institut": "Insee", "count": 227},
+		    {"institut": "Louis Harris France", "count": 1238},
+		    {"institut": "Ifres", "count": 441},
+		    {"institut": "Faits & Opinion", "count": 206},
+		    {"institut": "CSA", "count": 1760},
+		    {"institut": "Ipsos", "count": 1743},
+		    {"institut": "Divers", "count": 4900}];
+
+		var canvasWidth = 900,
+		    canvasHeight = 700,
+		    outerRadius = 300, 
+		    innerRadius = 150,
+		    color = d3.scale.category20b();
+
+
+		var vis = d3.select("body")
+		    .append("svg")
+		        .data([ladata])
+		        .attr("width", canvasWidth)
+		        .attr("height", canvasHeight)
+		        .append("g")
+		            .attr("transform", "translate(" + canvasWidth/2 + "," + canvasHeight/2 + ")")
+
+		var arc = d3.svg.arc()
+		    .outerRadius(outerRadius)
+		    .innerRadius(innerRadius);
+
+		var pie = d3.layout.pie()
+		    .value(function(d) { return d.count; })
+		    .sort(null);
+
+		var arcs = vis.selectAll("g.slice")
+		    .data(pie)
+		    .enter()
+		    .append("g")
+		        .attr("class", "slice");
+
+		arcs.append("path")
+		    .attr("fill", function(d, i) { return color(i); } )
+		    .attr("d", arc);
+
+		arcs.append("text")
+		    .attr("transform", function(d) {
+		        d.outerRadius = outerRadius + 50;
+		        d.innerRadius = outerRadius + 45;
+		        return "translate(" + arc.centroid(d) + ") rotate(" + angle(d) + ")";
+		        })
+		    .attr("text-anchor", "middle")
+		    .style("fill", "white")
+		    .style("font", "bold 11px Arial")
+		    .text(function(d, i) { return ladata[i].institut; });
+
+		arcs.filter(function(d) { return d.endAngle - d.startAngle > .2; }).append("text")
+		    .attr("dy", "13px")
+		    .attr("text-anchor", "middle")
+		    .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")rotate(" + angle(d) + ")";})
+		    .style("fill", "white")
+		    .style("font", "bold 10px Arial")
+		    .text(function(d) { return d.data.count; });
+
+		function angle(d) {
+		  var a = (d.startAngle + d.endAngle) * 90 / Math.PI - 90;
+		  return a > 90 ? a - 180 : a;
+		}
+
+  	</script>
+  </body>
+</html>
